@@ -1,0 +1,46 @@
+import sqlite3
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from requests import request
+
+
+conn=sqlite3.connect("Faculty")
+cursor=conn.cursor()
+try:
+    conn.execute('BEGIN')
+    cursor.execute('drop table Faculty')
+    cursor.execute("create table Faculty ('Name' vachar2(20), 'Department' varchar2(30) , 'Fid' number(10), 'Mobile' number(10), 'Email' varchar2(50))")
+    cursor.execute("insert into Faculty Values ('Lakshmi','Maths',1214008,123567891,'lakshmi@gmail.com')")
+    cursor.execute("insert into Faculty values('Vijaya','Stats',1214010,1231231231,'vijaya@gmail.com')")
+    cursor.execute("insert into Faculty Values ('Rani','Computers',1214009,123567891,'rani@gmail.com')")
+    cursor.execute("insert into Faculty Values ('Priya','English',1214016,1234561234,'priya@gmail.com')")
+    cursor.execute("insert into Faculty Values ('Keerthi','Maths',1214001,1212121212,'keerthi@gmail.com')")
+    cursor.execute("insert into Faculty Values ('Rakesh','Physics',1214003,1234512345,'rakesh@gmail.com')")
+    cursor.execute("insert into Faculty Values ('Aishu','Chemistry',1214005,1234123412,'aishu@gmail.com')")
+    conn.commit()
+except Exception as e:
+    print(e)
+    conn.rollback()
+finally:
+    cursor.close()
+    conn.close()   
+app=FastAPI()
+templates=Jinja2Templates(directory="templates")
+@app.get("/Faculty-details")
+def Faculty(request:Request):
+    conn=sqlite3.connect("Faculty")
+    cursor=conn.cursor()
+    try:
+        conn.execute('BEGIN')
+        cursor.execute("select * from Faculty")
+        Faculty=cursor.fetchall()
+        print(Faculty)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return templates.TemplateResponse("index.html", {"request": request,"data": Faculty})
