@@ -15,7 +15,7 @@
     <br />
     <h1 class="text-center">Faculty Details</h1>
     <br />
-
+    <!-- Add Faculty details -->
     <!-- Button trigger modal -->
     <button
       type="button"
@@ -108,9 +108,67 @@
         </div>
       </div>
     </div>
+    <!-- Delete Faculty details -->
+    <!-- Button trigger modal -->
+    <button
+      type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#deleteFaculty"
+    >
+      Delete Faculty
+    </button>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="deleteFaculty"
+      tabindex="-1"
+      aria-labelledby="deleteFacultyModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deleteFacultyModel">
+              Delete Faculty
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <form action="/delete-faculty" method="post">
+            <div class="modal-body">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter Faculty ID"
+                aria-label="Enter Faculty ID"
+                aria-describedby="basic-addon1"
+                name="Fid"
+              />
+            </div>
+
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- to display data -->
-    <table class="table m-3" id="studentsTable">
+    <table class="table m-3" id="facultyTable">
       <thead>
         <tr>
           <th scope="col">Name</th>

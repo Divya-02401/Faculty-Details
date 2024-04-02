@@ -24,6 +24,7 @@ except Exception as e:
 finally:
     cursor.close()
     conn.close()   
+
 app=FastAPI()
 templates=Jinja2Templates(directory="templates")
 @app.get("/Faculty-details")
@@ -43,6 +44,7 @@ def Faculty(request:Request):
         cursor.close()
         conn.close()
     return templates.TemplateResponse("index.html", {"request": request,"data": Faculty})
+
 @app.post('/add-faculty')
 def add_faculty(Name:str=Form(...),Department:str=Form(...),Fid:str=Form(...),Mobile:str=Form(...),Email:str=Form(...)):
     conn=sqlite3.connect("Faculty")
@@ -59,4 +61,22 @@ def add_faculty(Name:str=Form(...),Department:str=Form(...),Fid:str=Form(...),Mo
     finally:
         cursor.close()
         conn.close()
-        return True
+    return True
+
+@app.post("/delete-faculty")
+def delete_faculty(Fid:str=Form(...)):
+    conn=sqlite3.connect("Faculty")
+    cursor=conn.cursor()
+    try:
+        query=f"delete from Faculty where (Fid) = ('{Fid}')"
+        print(query)
+        conn.execute('BEGIN')
+        cursor.execute(query)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+    return True
