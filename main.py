@@ -80,3 +80,24 @@ def delete_faculty(Fid:str=Form(...)):
         cursor.close()
         conn.close()
     return True
+
+
+@app.post("/select-department")
+async def search_department(request: Request, Department: dict):
+  conn=sqlite3.connect("Faculty")
+  cursor=conn.cursor()
+  selected_department = Department.get('Department')
+  try:
+    query=f"SELECT *  FROM Faculty where Department=('{selected_department}') "
+    print(query)
+    conn.execute('BEGIN')
+    cursor.execute(query)  
+    Faculty=cursor.fetchall()
+    print(Faculty)
+    conn.commit()
+  except Exception as e:
+    conn.rollback()
+  finally:
+    cursor.close()
+    conn.close()  
+  return Faculty
