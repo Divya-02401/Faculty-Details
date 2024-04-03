@@ -213,7 +213,7 @@
         let selected_department =
           document.getElementById("select-department").value;
         console.log(selected_department);
-        let url = `/select-department`;
+        let url = "/select-department";
         fetch(url, {
           method: "post",
           body: JSON.stringify({ Department: selected_department }),
