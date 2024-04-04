@@ -173,13 +173,10 @@
       id="select-department"
       onchange="selectDepartment()"
     >
-      <option selected>Select Department</option>
-      <option value="Maths">Maths</option>
-      <option value="Stats">Stats</option>
-      <option value="Computers">Computers</option>
-      <option value="English">English</option>
-      <option value="Physics">Physics</option>
-      <option value="Chemistry">Chemistry</option>
+      <option>Select any course</option>
+      {% for row in data %}
+      <option value="{{row[1]}}">{{row[1]}}</option>
+      {% endfor %}
     </select>
     <!-- to display data -->
     <table class="table m-3" id="facultyTable">
