@@ -10,6 +10,11 @@
       integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
       crossorigin="anonymous"
     />
+    <!-- Add this line in the <head> section of your HTML -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <br />
@@ -187,6 +192,7 @@
           <th scope="col">Faculty Id</th>
           <th scope="col">Mobile Number</th>
           <th scope="col">Email Id</th>
+          <th scope="col">Action</th>
           <!-- Add more headers based on your table columns -->
         </tr>
       </thead>
@@ -198,75 +204,24 @@
           <td>{{ row[2] }}</td>
           <td>{{ row[3] }}</td>
           <td>{{ row[4] }}</td>
-
+          <td>{{ row[5] }}</td>
+          <td>
+            <!-- Edit Icon -->
+            <a href="#" title="Edit">
+              <i class="bi bi-pencil-fill"></i>
+            </a>
+            &nbsp
+            <!-- Delete Icon -->
+            <a href="#" title="Delete">
+              <i class="bi bi-trash-fill"></i>
+            </a>
+          </td>
           <!-- Add more cells based on your table columns -->
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <script>
-      function fetchDepartments() {
-        fetch("/departments")
-          .then((response) => response.json())
-          .then((data) => {
-            const select = document.getElementById("select-department");
-            select.innerHTML = "<option value=''>Select Department</option>";
-            data.forEach((department) => {
-              const option = document.createElement("option");
-              option.value = department;
-              option.text = department;
-              select.appendChild(option);
-            });
-          })
-          .catch((error) =>
-            console.error("Error fetching departments:", error)
-          );
-      }
 
-      function selectDepartment() {
-        console.log("inside function");
-        let selected_department =
-          document.getElementById("select-department").value;
-        console.log(selected_department);
-        let url = "/select-department";
-        fetch(url, {
-          method: "post",
-          body: JSON.stringify({ Department: selected_department }),
-          headers: {
-            "content-type": "application/json",
-          },
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((data) => {
-            const tableBody = document
-              .getElementById("facultyTable")
-              .getElementsByTagName("tbody")[0];
-            tableBody.innerHTML = " ";
-            data.forEach((Faculty) => {
-              const row = tableBody.insertRow();
-              const cell1 = row.insertCell(0);
-              const cell2 = row.insertCell(1);
-              const cell3 = row.insertCell(2);
-              const cell4 = row.insertCell(3);
-              const cell5 = row.insertCell(4);
-
-              console.log(Faculty);
-              cell1.textContent = Faculty[0];
-              cell2.textContent = Faculty[1];
-              cell3.textContent = Faculty[2];
-              cell4.textContent = Faculty[3];
-              cell5.textContent = Faculty[4];
-            });
-            console.log(data);
-          })
-          .catch((err) => {
-            console.log("error");
-          });
-      }
-      fetchDepartments();
-    </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
