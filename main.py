@@ -82,6 +82,22 @@ def delete_faculty(Fid:str=Form(...)):
     return True
 
 
+@app.get("/departments")
+async def get_departments():
+    conn = sqlite3.connect("Faculty")
+    cursor = conn.cursor()
+    try:
+        query = "SELECT DISTINCT Department FROM Faculty"
+        cursor.execute(query)
+        departments = [row[0] for row in cursor.fetchall()]
+        return departments
+    except Exception as e:
+        print("Error fetching departments:", e)
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.post("/select-department")
 async def search_department(request: Request, Department: dict):
   conn=sqlite3.connect("Faculty")
@@ -91,7 +107,7 @@ async def search_department(request: Request, Department: dict):
     query=f"SELECT *  FROM Faculty where Department=('{selected_department}') "
     print(query)
     conn.execute('BEGIN')
-    cursor.execute(query)  
+    cursor.execute(query) 
     Faculty=cursor.fetchall()
     print(Faculty)
     conn.commit()
@@ -101,3 +117,4 @@ async def search_department(request: Request, Department: dict):
     cursor.close()
     conn.close()  
   return Faculty
+

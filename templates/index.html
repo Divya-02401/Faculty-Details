@@ -173,7 +173,7 @@
       id="select-department"
       onchange="selectDepartment()"
     >
-      <option>Select any course</option>
+      <option>Department</option>
       {% for row in data %}
       <option value="{{row[1]}}">{{row[1]}}</option>
       {% endfor %}
@@ -205,6 +205,24 @@
       </tbody>
     </table>
     <script>
+      function fetchDepartments() {
+        fetch("/departments")
+          .then((response) => response.json())
+          .then((data) => {
+            const select = document.getElementById("select-department");
+            select.innerHTML = "<option value=''>Select Department</option>";
+            data.forEach((department) => {
+              const option = document.createElement("option");
+              option.value = department;
+              option.text = department;
+              select.appendChild(option);
+            });
+          })
+          .catch((error) =>
+            console.error("Error fetching departments:", error)
+          );
+      }
+
       function selectDepartment() {
         console.log("inside function");
         let selected_department =
@@ -247,6 +265,7 @@
             console.log("error");
           });
       }
+      fetchDepartments();
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
