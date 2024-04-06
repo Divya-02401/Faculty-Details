@@ -1,5 +1,6 @@
 import sqlite3
 from fastapi import FastAPI, Form, Request
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from requests import request
 
@@ -8,15 +9,6 @@ conn=sqlite3.connect("Faculty")
 cursor=conn.cursor()
 try:
     conn.execute('BEGIN')
-    # cursor.execute('drop table Faculty')
-    # cursor.execute("create table Faculty ('Name' vachar2(20), 'Department' varchar2(30) , 'Fid' number(10), 'Mobile' number(10), 'Email' varchar2(50))")
-    # cursor.execute("insert into Faculty Values ('Lakshmi','Maths',1214008,123567891,'lakshmi@gmail.com')")
-    # cursor.execute("insert into Faculty values('Vijaya','Stats',1214010,1231231231,'vijaya@gmail.com')")
-    # cursor.execute("insert into Faculty Values ('Rani','Computers',1214009,123567891,'rani@gmail.com')")
-    # cursor.execute("insert into Faculty Values ('Priya','English',1214016,1234561234,'priya@gmail.com')")
-    # cursor.execute("insert into Faculty Values ('Keerthi','Maths',1214001,1212121212,'keerthi@gmail.com')")
-    # cursor.execute("insert into Faculty Values ('Rakesh','Physics',1214003,1234512345,'rakesh@gmail.com')")
-    # cursor.execute("insert into Faculty Values ('Aishu','Chemistry',1214005,1234123412,'aishu@gmail.com')")
     conn.commit()
 except Exception as e:
     print(e)
@@ -118,3 +110,40 @@ async def search_department(request: Request, Department: dict):
     conn.close()  
   return Faculty
 
+
+
+# Define a function to fetch all faculty members
+def fetch_faculty():
+    conn = sqlite3.connect("Faculty")
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM Faculty")
+        faculty = cursor.fetchall()
+        return faculty
+    finally:
+        cursor.close()
+        conn.close()
+
+# Define a function to delete a faculty member by their Fid
+def delete_faculty(fid):
+    conn = sqlite3.connect("Faculty")
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM Faculty WHERE Fid=?", (fid,))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+# Route to handle GET requests for displaying faculty details
+@app.get("/Faculty-details", response_class=HTMLResponse)
+async def display_faculty(request: Request):
+    faculty = fetch_faculty()
+    return templates.TemplateResponse("index.html", {"request": request, "data": faculty})
+
+# Route to handle POST requests for deleting a faculty member
+@app.post("/delete-faculty", response_class=HTMLResponse)
+async def delete_faculty_endpoint(Fid: str = Form(...)):
+    delete_faculty(Fid)
+    faculty = fetch_faculty()  # Fetch updated faculty list after deletion
+    return templates.TemplateResponse("index.html", {"request": request, "data": faculty})

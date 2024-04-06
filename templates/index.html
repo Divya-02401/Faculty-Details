@@ -198,7 +198,7 @@
       </thead>
       <tbody>
         {% for row in data %}
-        <tr>
+        <tr id="row_{{ row[2] }}">
           <td>{{ row[0] }}</td>
           <td>{{ row[1] }}</td>
           <td>{{ row[2] }}</td>
@@ -207,25 +207,105 @@
           <td>{{ row[5] }}</td>
           <td>
             <!-- Edit Icon -->
-            <a href="#" title="Edit">
+            <a href="#">
               <i class="bi bi-pencil-fill"></i>
             </a>
             &nbsp
             <!-- Delete Icon -->
-            <a href="#" title="Delete">
+            <a href="#" onclick="confirmDelete('{{ row[2] }}')">
               <i class="bi bi-trash-fill"></i>
             </a>
+            <!-- Add more cells based on your table columns -->
           </td>
-          <!-- Add more cells based on your table columns -->
         </tr>
+
         {% endfor %}
       </tbody>
     </table>
+    <script>
+      function fetchDepartments() {
+        fetch("/departments")
+          .then((response) => response.json())
+          .then((data) => {
+            const select = document.getElementById("select-department");
+            select.innerHTML = "<option value=''>Select Department</option>";
+            data.forEach((department) => {
+              const option = document.createElement("option");
+              option.value = department;
+              option.text = department;
+              select.appendChild(option);
+            });
+          })
+          .catch((error) =>
+            console.error("Error fetching departments:", error)
+          );
+      }
+
+      function selectDepartment() {
+        console.log("inside function");
+        let selected_department =
+          document.getElementById("select-department").value;
+        console.log(selected_department);
+        let url = "/select-department";
+        fetch(url, {
+          method: "post",
+          body: JSON.stringify({ Department: selected_department }),
+          headers: {
+            "content-type": "application/json",
+          },
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            const tableBody = document
+              .getElementById("facultyTable")
+              .getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = " ";
+            data.forEach((Faculty) => {
+              const row = tableBody.insertRow();
+              const cell1 = row.insertCell(0);
+              const cell2 = row.insertCell(1);
+              const cell3 = row.insertCell(2);
+              const cell4 = row.insertCell(3);
+              const cell5 = row.insertCell(4);
+
+              console.log(Faculty);
+              cell1.textContent = Faculty[0];
+              cell2.textContent = Faculty[1];
+              cell3.textContent = Faculty[2];
+              cell4.textContent = Faculty[3];
+              cell5.textContent = Faculty[4];
+            });
+            console.log(data);
+          })
+          .catch((err) => {
+            console.log("error");
+          });
+      }
+      fetchDepartments();
+
+      function confirmDelete(rowId) {
+        // Show confirmation alert
+        var confirmMessage =
+          "Are you sure you want to delete this faculty member?";
+        if (confirm(confirmMessage)) {
+          var rowToDelete = document.getElementById("row_" + rowId);
+          if (rowToDelete) {
+            rowToDelete.parentNode.removeChild(rowToDelete);
+          } else {
+            console.error("Row not found:", fid);
+          }
+        } else {
+        }
+      }
+    </script>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <!-- <script src="/static/index.js"></script> -->
   </body>
 </html>
