@@ -31,7 +31,7 @@
       Add Faculty
     </button>
 
-    <!-- Modal -->
+    <!-- Modal Add Faculty -->
     <div
       class="modal fade"
       id="exampleModal"
@@ -113,9 +113,10 @@
         </div>
       </div>
     </div>
+
     <!-- Delete Faculty details -->
     <!-- Button trigger modal -->
-    <button
+    <!-- <button
       type="button"
       class="btn btn-primary float-end m-1"
       data-bs-toggle="modal"
@@ -124,8 +125,8 @@
       Delete Faculty
     </button>
 
-    <!-- Modal -->
-    <div
+    Modal Delete Faculty -->
+    <!-- <div
       class="modal fade"
       id="deleteFaculty"
       tabindex="-1"
@@ -170,7 +171,7 @@
           </form>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <select
       class="form-select"
@@ -183,6 +184,83 @@
       <option value="{{row[1]}}">{{row[1]}}</option>
       {% endfor %}
     </select>
+    <!-- Modal for editing faculty details -->
+    <div
+      class="modal fade"
+      id="editModal"
+      tabindex="-1"
+      aria-labelledby="editModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">
+              Edit Faculty Details
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Form for editing faculty details -->
+            <form id="editForm">
+              <input type="hidden" id="editFid" name="Fid" />
+              <div class="mb-3">
+                <label for="editName" class="form-label">Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editName"
+                  name="Name"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editDepartment" class="form-label"
+                  >Department</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editDepartment"
+                  name="Department"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="editMobile" class="form-label">Mobile Number</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editMobile"
+                  name="Mobile"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editEmail" class="form-label">Email ID</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="editEmail"
+                  name="Email"
+                />
+              </div>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveChanges()"
+              >
+                Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- to display data -->
     <table class="table m-3" id="facultyTable">
       <thead>
@@ -207,7 +285,7 @@
           <td>{{ row[5] }}</td>
           <td>
             <!-- Edit Icon -->
-            <a href="#">
+            <a href="#" onclick="editFaculty('{{ row[2] }}')">
               <i class="bi bi-pencil-fill"></i>
             </a>
             &nbsp
@@ -285,19 +363,98 @@
       }
       fetchDepartments();
 
-      function confirmDelete(rowId) {
-        // Show confirmation alert
+      function confirmDelete(fid) {
         var confirmMessage =
           "Are you sure you want to delete this faculty member?";
         if (confirm(confirmMessage)) {
-          var rowToDelete = document.getElementById("row_" + rowId);
-          if (rowToDelete) {
-            rowToDelete.parentNode.removeChild(rowToDelete);
-          } else {
-            console.error("Row not found:", fid);
-          }
-        } else {
+          // Make an AJAX request to the backend to delete the faculty member
+          fetch("/delete-faculty", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "Fid=" + encodeURIComponent(fid),
+          })
+            .then((response) => {
+              // Handle response, maybe refresh the page or update UI
+              if (response.ok) {
+                // Refresh the page or update UI
+                location.reload();
+              } else {
+                console.error("Failed to delete faculty member");
+              }
+            })
+            .catch((error) => {
+              console.error("Error occurred:", error);
+            });
         }
+      }
+
+      // Function to handle edit icon click
+
+      function editFaculty(fid) {
+        fetch("/get-faculty", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: "Fid=" + encodeURIComponent(fid),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            populateEditModal(data);
+          })
+          .catch((error) => {
+            console.error("Error fetching faculty:", error);
+            alert("An error occurred while fetching faculty details");
+          });
+      }
+
+      function populateEditModal(faculty) {
+        document.getElementById("editName").value = faculty.Name;
+        document.getElementById("editDepartment").value = faculty.Department;
+        document.getElementById("editFid").value = faculty.Fid;
+        document.getElementById("editMobile").value = faculty.Mobile;
+        document.getElementById("editEmail").value = faculty.Email;
+
+        var editModal = new bootstrap.Modal(
+          document.getElementById("editModal")
+        );
+        editModal.show();
+      }
+
+      function saveChanges() {
+        const formData = new FormData(document.getElementById("editForm"));
+        const facultyData = {};
+        formData.forEach((value, key) => {
+          facultyData[key] = value;
+        });
+
+        fetch("/update-faculty", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(facultyData),
+        })
+          .then((response) => {
+            if (response.ok) {
+              alert("Faculty details updated successfully");
+              // Optionally, update the UI here if needed
+              // You can also close the modal or refresh the page
+            } else {
+              alert("Failed to update faculty details");
+            }
+          })
+          .catch((error) => {
+            console.error("Error updating faculty:", error);
+            alert("An error occurred while updating faculty details");
+          });
       }
     </script>
 
@@ -306,6 +463,6 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <!-- <script src="/static/index.js"></script> -->
+    <!-- <script src="./static/index.js"></script> -->
   </body>
 </html>

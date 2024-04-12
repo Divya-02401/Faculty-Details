@@ -1,7 +1,9 @@
+from http.client import HTTPException
 import sqlite3
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from requests import request
 
 
@@ -147,3 +149,58 @@ async def delete_faculty_endpoint(Fid: str = Form(...)):
     delete_faculty(Fid)
     faculty = fetch_faculty()  # Fetch updated faculty list after deletion
     return templates.TemplateResponse("index.html", {"request": request, "data": faculty})
+
+from fastapi import FastAPI, HTTPException, Form
+@app.post("/get-faculty")
+async def get_faculty(Fid: str = Form(...)):
+    try:
+        conn = sqlite3.connect("Faculty")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM Faculty WHERE Fid = ?", (Fid,))
+        faculty = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        if faculty:
+            return {
+                "Name": faculty[0],
+                "Department": faculty[1],
+                "Fid": faculty[2],
+                "Mobile": faculty[3],
+                "Email": faculty[4]
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Faculty not found")
+    except Exception as e:
+        print("Error:", e)  # Print the error for debugging purposes
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.post("/update-faculty")
+async def update_faculty(faculty_data: dict):
+    try:
+        conn = sqlite3.connect("Faculty")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Faculty 
+            SET Name = ?, Department = ?,Fid=?, Mobile = ?, Email = ?
+            WHERE Fid = ?
+            """,
+            (faculty_data["Name"], faculty_data["Department"], faculty_data["Mobile"], faculty_data["Email"], faculty_data["Fid"])
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return {"message": "Faculty details updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error updating faculty")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    
