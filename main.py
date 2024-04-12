@@ -185,7 +185,7 @@ async def update_faculty(faculty_data: dict):
 
         cursor.execute("""
             UPDATE Faculty 
-            SET Name = ?, Department = ?,Fid=?, Mobile = ?, Email = ?
+            SET Name = ?, Department = ?, Mobile = ?, Email = ?
             WHERE Fid = ?
             """,
             (faculty_data["Name"], faculty_data["Department"], faculty_data["Mobile"], faculty_data["Email"], faculty_data["Fid"])
