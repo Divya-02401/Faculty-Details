@@ -156,13 +156,10 @@ async def get_faculty(Fid: str = Form(...)):
     try:
         conn = sqlite3.connect("Faculty")
         cursor = conn.cursor()
-
         cursor.execute("SELECT * FROM Faculty WHERE Fid = ?", (Fid,))
         faculty = cursor.fetchone()
-
         cursor.close()
         conn.close()
-
         if faculty:
             return {
                 "Name": faculty[0],
