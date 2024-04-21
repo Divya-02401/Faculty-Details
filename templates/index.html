@@ -291,7 +291,7 @@
           <td>{{ row[2] }}</td>
           <td>{{ row[3] }}</td>
           <td>{{ row[4] }}</td>
-          <td>{{ row[5] }}</td>
+          <!-- <td>{{ row[5] }}</td> -->
           <td>
             <!-- Edit Icon -->
             <a href="#" onclick="editFaculty('{{ row[2] }}')">
@@ -309,7 +309,7 @@
         {% endfor %}
       </tbody>
     </table>
-    <ul class="pagination justify-content-center" id="pagination">
+    <!-- <ul class="pagination justify-content-center" id="pagination">
       <li class="page-item">
         <a class="page-link" href="#" aria-label="Previous">
           <span aria-hidden="true">&laquo;</span>
@@ -325,7 +325,7 @@
           <span aria-hidden="true">&raquo;</span>
         </a>
       </li>
-    </ul>
+    </ul> -->
     <script>
       function fetchDepartments() {
         fetch("/departments")
@@ -484,67 +484,67 @@
           });
       }
 
-      // Function to paginate student list
-      function paginateStudents(pageNumber, pageSize) {
-        const rows = document.querySelectorAll("#facultyTable tbody tr");
-        const startIndex = (pageNumber - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
+      // // Function to paginate student list
+      // function paginateStudents(pageNumber, pageSize) {
+      //   const rows = document.querySelectorAll("#facultyTable tbody tr");
+      //   const startIndex = (pageNumber - 1) * pageSize;
+      //   const endIndex = startIndex + pageSize;
 
-        rows.forEach((row, index) => {
-          if (index >= startIndex && index < endIndex) {
-            row.style.display = "";
-          } else {
-            row.style.display = "none";
-          }
-        });
+      //   rows.forEach((row, index) => {
+      //     if (index >= startIndex && index < endIndex) {
+      //       row.style.display = "";
+      //     } else {
+      //       row.style.display = "none";
+      //     }
+      //   });
 
-        displayPagination(pageNumber, pageSize);
-      }
+      //   displayPagination(pageNumber, pageSize);
+      // }
 
-      // Function to display pagination links
-      function displayPagination(pageNumber, pageSize) {
-        const rowsCount = document.querySelectorAll(
-          "#facultyTable tbody tr"
-        ).length;
-        const totalPages = Math.ceil(rowsCount / pageSize);
-        const paginationUl = document.getElementById("pagination");
-        paginationUl.innerHTML = ""; // Clear previous content
+      // // Function to display pagination links
+      // function displayPagination(pageNumber, pageSize) {
+      //   const rowsCount = document.querySelectorAll(
+      //     "#facultyTable tbody tr"
+      //   ).length;
+      //   const totalPages = Math.ceil(rowsCount / pageSize);
+      //   const paginationUl = document.getElementById("pagination");
+      //   paginationUl.innerHTML = ""; // Clear previous content
 
-        // Previous page link
-        if (pageNumber > 1) {
-          paginationUl.innerHTML += `
-            <li class="page-item">
-                <a class="page-link" href="#" onclick="paginateStudents(${
-                  pageNumber - 1
-                }, ${pageSize})" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>`;
-        }
+      //   // Previous page link
+      //   if (pageNumber > 1) {
+      //     paginationUl.innerHTML += `
+      //       <li class="page-item">
+      //           <a class="page-link" href="#" onclick="paginateStudents(${
+      //             pageNumber - 1
+      //           }, ${pageSize})" aria-label="Previous">
+      //               <span aria-hidden="true">&laquo;</span>
+      //           </a>
+      //       </li>`;
+      //   }
 
-        // Page links
-        for (let i = 1; i <= totalPages; i++) {
-          paginationUl.innerHTML += `
-            <li class="page-item ${i === pageNumber ? "active" : ""}">
-                <a class="page-link" href="#" onclick="paginateStudents(${i}, ${pageSize})">${i}</a>
-            </li>`;
-        }
+      //   // Page links
+      //   for (let i = 1; i <= totalPages; i++) {
+      //     paginationUl.innerHTML += `
+      //       <li class="page-item ${i === pageNumber ? "active" : ""}">
+      //           <a class="page-link" href="#" onclick="paginateStudents(${i}, ${pageSize})">${i}</a>
+      //       </li>`;
+      //   }
 
-        // Next page link
-        if (pageNumber < totalPages) {
-          paginationUl.innerHTML += `
-            <li class="page-item">
-                <a class="page-link" href="#" onclick="paginateStudents(${
-                  pageNumber + 1
-                }, ${pageSize})" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>`;
-        }
-      }
+      //   // Next page link
+      //   if (pageNumber < totalPages) {
+      //     paginationUl.innerHTML += `
+      //       <li class="page-item">
+      //           <a class="page-link" href="#" onclick="paginateStudents(${
+      //             pageNumber + 1
+      //           }, ${pageSize})" aria-label="Next">
+      //               <span aria-hidden="true">&raquo;</span>
+      //           </a>
+      //       </li>`;
+      //   }
+      // }
 
-      // Initial pagination
-      paginateStudents(1, 10);
+      // // Initial pagination
+      // paginateStudents(1, 10);
     </script>
 
     <script
@@ -552,10 +552,23 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.datatables.net/2.0.5/js/dataTables.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.datatables.net/2.0.5/js/dataTables.bootstrap5.js"
+    ></script>
     <script>
-      // $(document).ready(function () {
-      //   $("#facultyTable").DataTable();
-      // });
+      $(document).ready(function () {
+        $("#facultyTable").DataTable();
+      });
     </script>
     <!-- <script src="./static/index.js"></script> -->
   </body>
