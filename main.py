@@ -1,5 +1,6 @@
 from http.client import HTTPException
 import sqlite3
+import bcrypt
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -201,3 +202,27 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
     
+
+  
+
+@app.get("/User-details")
+def User(user_request:Request):   
+    return templates.TemplateResponse("SignUp.html", {"request": user_request})
+@app.post("/add-user")
+def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
+    user_conn=sqlite3.connect("User")
+    user_cursor=user_conn.cursor()
+    try:
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        query=f"insert into User (UserName,Email,password) values ('{UserName}','{Email}','{hashed_password}') "
+        print(query)
+        user_conn.execute('BEGIN')
+        user_cursor.execute(query)
+        user_conn.commit()
+    except Exception as e:
+        user_conn.rollback()
+        print(e)
+    finally:
+        user_cursor.close()
+        user_conn.close()
+        return True

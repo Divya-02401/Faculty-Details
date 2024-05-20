@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        box-sizing: border-box;
+      }
+      .container {
+        width: 100%;
+        height: 100vh;
+      }
+      .form-box {
+        width: 90%;
+        max-width: 450px;
+        position: absolute;
+        /* top: 50%;
+        left: 50%; */
+        /* transform: translate(-50%, -50%); */
+        background: white;
+        padding: 50px 60px 70px;
+        text-align: center;
+      }
+      .form-box h1 {
+        font-size: 30px;
+        margin-bottom: 60px;
+        color: rgb(59, 59, 179);
+        position: relative;
+      }
+      .form-box h1::after {
+        content: "";
+        width: 30px;
+        height: 4px;
+        border-radius: 3px;
+        background-color: rgb(59, 59, 179);
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translate(-50%);
+      }
+      .input-field {
+        background: #eaeaea;
+        margin: 15px 0;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        max-height: 65px;
+        transition: max-height 0s;
+        overflow: hidden;
+      }
+      input {
+        width: 100%;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        padding: 18px 15px;
+      }
+      .input-field i {
+        margin-left: 15px;
+        color: #999;
+      }
+      form p {
+        text-align: left;
+        font-size: 13px;
+      }
+      form p a {
+        text-decoration: none;
+        color: #3c00a0;
+      }
+      .btn-field {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding-top: 30px;
+      }
+      .btn-field button {
+        flex-basis: 48%;
+        background: rgb(46, 46, 214);
+        color: #fff;
+        height: 40px;
+        border-radius: 20px;
+        border: 0;
+        outline: 0;
+        cursor: pointer;
+        transition: 1s;
+      }
+      .btn-field button.disable {
+        background: #eaeaea;
+        color: #555;
+      }
+    </style>
+    <script
+      src="https://kit.fontawesome.com/0533d44049.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-box">
+        <h1 id="title">Sign Up</h1>
+        <form action="/add-user" method="post" id="signupForm">
+          <div class="input-group">
+            <div class="input-field" id="nameField">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" placeholder="User Name" name="UserName" />
+            </div>
+            <div class="input-field" id="emailField">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" placeholder="Email" name="Email" />
+            </div>
+            <div class="input-field">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="password"
+                placeholder="Password"
+                name="password"
+              />
+            </div>
+            <div class="input-field">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="passwordField"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+              />
+            </div>
+            <p id="forgotPassword"></p>
+          </div>
+          <div class="btn-field">
+            <button type="submit" id="signupBtn" onclick="signUp">
+              Sign Up
+            </button>
+            <!-- <button type="submit" class="disable" id="signinBtn">Sign In</button> -->
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      //   let signupBtn = document.getElementById("signupBtn");
+      //   let signinBtn = document.getElementById("signinBtn");
+      //   let nameField = document.getElementById("nameField");
+      //   let emailField = document.getElementById("emailField");
+      //   let password = document.getElementById("password");
+      //   let passwordField = document.getElementById("passwordField");
+      //   let forgotPassword = document.getElementById("forgotPassword");
+      //   let title = document.getElementById("title");
+      //   signinBtn.onclick = function () {
+      //     emailField.style.maxHeight = "0";
+      //     passwordField.style.maxHeight = "0";
+      //     title.innerHTML = "Sign In";
+      //     forgotPassword.innerHTML =
+      //       "Forgot password <a href='#'>Click here!</a>";
+      //     signupBtn.classList.add("disable");
+      //     signinBtn.classList.remove("disable");
+      //   };
+      //   signupBtn.onclick = function () {
+      //     emailField.style.maxHeight = "60px";
+      //     passwordField.style.maxHeight = "60px";
+      //     title.innerHTML = "Sign Up";
+      //     forgotPassword.innerHTML = " ";
+      //     signupBtn.classList.remove("disable");
+      //     signinBtn.classList.add("disable");
+      //   };
+      function signUp(event) {
+        event.preventDefault();
+        const password = document.getElementById("password").value;
+        console.log(password);
+        const confirmPassword = document.getElementById("passwordField").value;
+        console.log(confirmPassword);
+        if (password != confirmPassword) {
+          alert("Password does not match!");
+          //   return;
+        }
+        console.log("Password correct");
+        //     const formData = new FormData(event.target);
+        //     const data = Object.fromEntries(formData.entries());
+        //     // let url = `/add-user`;
+        //     fetch("/add-user", {
+        //       method: "post",
+        //       headers: {
+        //         "Content-Type": "application/json",
+        //       },
+        //       body: JSON.stringify(data),
+        //     })
+        //       .then((response) => response.json())
+        //       .then((result) => {
+        //         alert(result.message);
+        //       })
+        //       .catch((error) => {
+        //         console.error("Error during signup:", error);
+        //         alert("An error occiured during signup");
+        //       });
+      }
+    </script>
+  </body>
+</html>
