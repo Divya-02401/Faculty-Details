@@ -2,7 +2,7 @@ from http.client import HTTPException
 import sqlite3
 import bcrypt
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from requests import request
@@ -231,28 +231,36 @@ def get_db_connection():
     except Exception as e:
         print(e)
         return None
-    
-@app.get("/User-details")
-def User(user_request:Request):   
-    # mycursor.execute('use university;')
-    myconnection=get_db_connection()
-    if not myconnection:
-        return{"Error":"Database connection failed"}
 
-    try:
-        mycursor=myconnection.cursor()
-        print("Database connected")
-        mycursor.execute("select * from users")
-        users=mycursor.fetchall()
-        print(users)
-        myconnection.commit()
-    except Exception as e:
-        print(e)
-        # mydb.rollback()
-    finally:
-        mycursor.close()
-        myconnection.close()
-    return templates.TemplateResponse("Signup.html", {"request": user_request})
+@app.get("/signin")
+def read_signin(request: Request):
+    return templates.TemplateResponse("Signin.html", {"request": request})
+
+@app.get("/signup")
+def read_signup(request: Request):
+    return templates.TemplateResponse("SignUp.html", {"request": request}) 
+
+# @app.get("/User-details")
+# def User(user_request:Request):   
+#     # mycursor.execute('use university;')
+#     myconnection=get_db_connection()
+#     if not myconnection:
+#         return{"Error":"Database connection failed"}
+
+#     try:
+#         mycursor=myconnection.cursor()
+#         print("Database connected")
+#         mycursor.execute("select * from users")
+#         users=mycursor.fetchall()
+#         print(users)
+#         myconnection.commit()
+#     except Exception as e:
+#         print(e)
+#         # mydb.rollback()
+#     finally:
+#         mycursor.close()
+#         myconnection.close()
+#     return templates.TemplateResponse("Signin.html", {"request": user_request})
 @app.post("/add-user")
 def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
     myconnection=get_db_connection()
@@ -266,7 +274,7 @@ def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
         print(query)
         mycursor.execute(query,(UserName,Email,hashed_password))
         myconnection.commit()
-        return {"Success" : "User added successfully"}
+        return RedirectResponse(url="/signin", status_code=302)
     except IntegrityError as e:
         print(f"Integrity error: {e}" )
         if e.errno == mysql.connector.errorcode.ER_DUP_ENTRY:
@@ -282,7 +290,7 @@ def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
     finally:
         mycursor.close()
         myconnection.close()
-        return True
+        # return True
 
 def check_username_exists(mycursor, username):
     query = "SELECT password FROM users WHERE username = %s"

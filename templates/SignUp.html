@@ -16,6 +16,7 @@
         height: 100vh;
       }
       .form-box {
+        font-family: sans-serif;
         width: 90%;
         max-width: 450px;
         position: absolute;
@@ -24,7 +25,7 @@
         /* transform: translate(-50%, -50%); */
         background: white;
         padding: 50px 60px 70px;
-        text-align: center;
+        /* text-align: center; */
       }
       .form-box h1 {
         font-size: 30px;
@@ -32,7 +33,7 @@
         color: rgb(59, 59, 179);
         position: relative;
       }
-      .form-box h1::after {
+      /* .form-box h1::after {
         content: "";
         width: 30px;
         height: 4px;
@@ -42,16 +43,16 @@
         bottom: -12px;
         left: 50%;
         transform: translate(-50%);
-      }
+      } */
       .input-field {
         background: #eaeaea;
         margin: 15px 0;
         border-radius: 3px;
         display: flex;
         align-items: center;
-        max-height: 65px;
+        /* max-height: 65px;
         transition: max-height 0s;
-        overflow: hidden;
+        overflow: hidden; */
       }
       input {
         width: 100%;
@@ -92,6 +93,9 @@
       .btn-field button.disable {
         background: #eaeaea;
         color: #555;
+      }
+      p a {
+        text-decoration: none;
       }
     </style>
     <script
@@ -140,7 +144,6 @@
             </div>
             <!-- <p id="forgotPassword"></p> -->
           </div>
-          <p>Already have account? <a href="./Signin.html">Login </a></p>
 
           <div class="btn-field">
             <button type="submit" id="signupBtn" onclick="signUp">
@@ -149,43 +152,11 @@
             <!-- <button type="submit" class="disable" id="signinBtn">Sign In</button> -->
           </div>
         </form>
-      </div>
-    </div>
-    <div class="container">
-      <div class="form-box">
-        <h1 id="title">Sign In</h1>
-        <form action="/sign-in" method="post" id="signinForm">
-          <div class="input-group">
-            <div class="input-field" id="nameField">
-              <i class="fa-solid fa-user"></i>
-              <input
-                type="text"
-                placeholder="User Name"
-                name="UserName"
-                required
-              />
-            </div>
-
-            <div class="input-field">
-              <i class="fa-solid fa-lock"></i>
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                name="password"
-                required
-              />
-            </div>
-          </div>
-          <div class="btn-field">
-            <button type="submit">Sign in</button>
-          </div>
-        </form>
-        <p>Forgot password? <a href=" "> click here!</a></p>
         <br />
-        <p>Dont have account? <a href="./SignUp.html">Create account</a></p>
+        <p>Already have account? <a href="/signin">Login </a></p>
       </div>
     </div>
+
     <script>
       function signUp(event) {
         event.preventDefault();
