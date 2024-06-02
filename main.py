@@ -7,11 +7,15 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from requests import request
 
+import sqlite3
+
 
 conn=sqlite3.connect("Faculty")
 cursor=conn.cursor()
 try:
     conn.execute('BEGIN')
+    cursor.execute("create table Faculty 'Name' varchar(25) 'Department' varchar2(30), 'Fid' int(10), 'Mobile' int(10), 'Email' varchar2(40)")
+
     conn.commit()
 except Exception as e:
     print(e)
@@ -22,23 +26,24 @@ finally:
 
 app=FastAPI()
 templates=Jinja2Templates(directory="templates")
-@app.get("/Faculty-details")
+@app.get('/Faculty-details',response_class=HTMLResponse)
 def Faculty(request:Request):
     conn=sqlite3.connect("Faculty")
     cursor=conn.cursor()
-    try:
+    try:   
         conn.execute('BEGIN')
         cursor.execute("select * from Faculty")
-        Faculty=cursor.fetchall()
-        print(Faculty)
+        Faculty_details=cursor.fetchall()
+        print(Faculty_details)
         conn.commit()
     except Exception as e:
         print(e)
         conn.rollback()
+        # Faculty_details=[]
     finally:
         cursor.close()
         conn.close()
-    return templates.TemplateResponse("index.html", {"request": request,"data": Faculty})
+    return templates.TemplateResponse("index.html", {"request": request,"data": Faculty_details})
 
 @app.post('/add-faculty')
 def add_faculty(Name:str=Form(...),Department:str=Form(...),Fid:str=Form(...),Mobile:str=Form(...),Email:str=Form(...)):
@@ -197,32 +202,118 @@ async def update_faculty(faculty_data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error updating faculty")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
     
 
-  
+# mycursor=mydb.cursor()
+# mycursor.execute("use university;")
+# str="insert into users(username,email) values('ran','ran@gmail.com');"
+# mycursor.execute(str)
+# mycursor.execute("select * from users;")
+# data=mycursor.fetchall()
+# print(data)
 
+
+# userconn=sqlite3.connect("User")
+import mysql.connector
+def get_db_connection():
+    try:
+        myconnection=mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="1234",
+            database="university"
+        )
+        return myconnection
+    except Exception as e:
+        print(e)
+        return None
+    
 @app.get("/User-details")
 def User(user_request:Request):   
-    return templates.TemplateResponse("SignUp.html", {"request": user_request})
+    # mycursor.execute('use university;')
+    myconnection=get_db_connection()
+    if not myconnection:
+        return{"Error":"Database connection failed"}
+
+    try:
+        mycursor=myconnection.cursor()
+        print("Database connected")
+        mycursor.execute("select * from users")
+        users=mycursor.fetchall()
+        print(users)
+        myconnection.commit()
+    except Exception as e:
+        print(e)
+        # mydb.rollback()
+    finally:
+        mycursor.close()
+        myconnection.close()
+    return templates.TemplateResponse("Signup.html", {"request": user_request})
 @app.post("/add-user")
 def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
-    user_conn=sqlite3.connect("User")
-    user_cursor=user_conn.cursor()
+    myconnection=get_db_connection()
+    if not myconnection:
+        return{"Error":"Database connection failed"}
+    # mycursor.execute('use university;')
     try:
+        mycursor=myconnection.cursor()
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        query=f"insert into User (UserName,Email,password) values ('{UserName}','{Email}','{hashed_password}') "
+        query="insert into users (username,email,password) values (%s,%s,%s) "
         print(query)
-        user_conn.execute('BEGIN')
-        user_cursor.execute(query)
-        user_conn.commit()
+        mycursor.execute(query,(UserName,Email,hashed_password))
+        myconnection.commit()
+        return {"Success" : "User added successfully"}
+    except IntegrityError as e:
+        print(f"Integrity error: {e}" )
+        if e.errno == mysql.connector.errorcode.ER_DUP_ENTRY:
+            return {"Error": "Username or email already exists"}
+        else:
+            return {"Error": str(e)}
+    except mysql.connector.Error as e:
+        print(f"MySQL Error: {e}")  # Log the exception
+        return {"Error": str(e)}    
     except Exception as e:
-        user_conn.rollback()
         print(e)
+        myconnection.rollback()
     finally:
-        user_cursor.close()
-        user_conn.close()
+        mycursor.close()
+        myconnection.close()
         return True
+
+def check_username_exists(mycursor, username):
+    query = "SELECT password FROM users WHERE username = %s"
+    mycursor.execute(query, (username,))
+    result = mycursor.fetchone()
+    mycursor.fetchall() # This ensures any remaining results are read and discarded
+    return result
+
+def verify_password(stored_password, provided_password):
+    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
+
+@app.post("/sign-in")
+def signin(UserName:str=Form(...),password:str=Form(...)):
+    myconnection=get_db_connection()
+    if not myconnection:
+        return{"Error":"Database connection failed"}
+    try:
+        mycursor=myconnection.cursor()
+        result = check_username_exists(mycursor, UserName)
+        if result:
+            stored_password = result[0]
+            if verify_password(stored_password, password):
+                return {"Success": "Authentication successful"}
+            else:
+                return {"Error": "Incorrect password"}
+        else:
+            return {"Error": "Username does not exist"}
+        
+    except Exception as e:
+        print(e)
+        # myconnection.rollback()
+    finally:
+        mycursor.close()
+        myconnection.close()

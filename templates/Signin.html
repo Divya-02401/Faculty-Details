@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User</title>
+    <title>Sign In</title>
     <style>
       * {
         margin: 0;
@@ -102,57 +102,6 @@
   <body>
     <div class="container">
       <div class="form-box">
-        <h1 id="title">Sign Up</h1>
-        <form action="/add-user" method="post" id="signupForm">
-          <div class="input-group">
-            <div class="input-field" id="nameField">
-              <i class="fa-solid fa-user"></i>
-              <input
-                type="text"
-                placeholder="User Name"
-                name="UserName"
-                required
-              />
-            </div>
-            <div class="input-field" id="emailField">
-              <i class="fa-solid fa-envelope"></i>
-              <input type="email" placeholder="Email" name="Email" required />
-            </div>
-            <div class="input-field">
-              <i class="fa-solid fa-lock"></i>
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                name="password"
-                required
-              />
-            </div>
-            <div class="input-field">
-              <i class="fa-solid fa-lock"></i>
-              <input
-                type="password"
-                id="passwordField"
-                placeholder="Confirm Password"
-                name="confirmPassword"
-                required
-              />
-            </div>
-            <!-- <p id="forgotPassword"></p> -->
-          </div>
-          <p>Already have account? <a href="./Signin.html">Login </a></p>
-
-          <div class="btn-field">
-            <button type="submit" id="signupBtn" onclick="signUp">
-              Sign Up
-            </button>
-            <!-- <button type="submit" class="disable" id="signinBtn">Sign In</button> -->
-          </div>
-        </form>
-      </div>
-    </div>
-    <div class="container">
-      <div class="form-box">
         <h1 id="title">Sign In</h1>
         <form action="/sign-in" method="post" id="signinForm">
           <div class="input-group">
@@ -186,18 +135,5 @@
         <p>Dont have account? <a href="./SignUp.html">Create account</a></p>
       </div>
     </div>
-    <script>
-      function signUp(event) {
-        event.preventDefault();
-        const password = document.getElementById("password").value;
-        console.log(password);
-        const confirmPassword = document.getElementById("passwordField").value;
-        console.log(confirmPassword);
-        if (password != confirmPassword) {
-          alert("Password does not match!");
-        }
-        console.log("Password correct");
-      }
-    </script>
   </body>
 </html>
