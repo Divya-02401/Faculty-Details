@@ -400,6 +400,7 @@
               const cell3 = row.insertCell(2);
               const cell4 = row.insertCell(3);
               const cell5 = row.insertCell(4);
+              const cell6 = row.insertCell(5);
 
               console.log(Faculty);
               cell1.textContent = Faculty[0];
@@ -407,6 +408,25 @@
               cell3.textContent = Faculty[2];
               cell4.textContent = Faculty[3];
               cell5.textContent = Faculty[4];
+              const editIcon = document.createElement("i");
+
+              // Add action icons
+              editIcon.className = "bi bi-pencil-fill";
+              editIcon.style.cursor = "pointer";
+              editIcon.onclick = function () {
+                editFaculty(Faculty[2]);
+              };
+
+              const deleteIcon = document.createElement("i");
+              deleteIcon.className = "bi bi-trash-fill";
+              deleteIcon.style.cursor = "pointer";
+              deleteIcon.onclick = function () {
+                confirmDelete(Faculty[2]);
+              };
+
+              cell6.appendChild(editIcon);
+              cell6.appendChild(document.createTextNode(" ")); // Space between icons
+              cell6.appendChild(deleteIcon);
             });
             console.log(data);
           })
@@ -432,7 +452,8 @@
               // Handle response, maybe refresh the page or update UI
               if (response.ok) {
                 // Refresh the page or update UI
-                location.reload();
+                window.location.reload();
+                // window.location.href = window.location.href;
               } else {
                 console.error("Failed to delete faculty member");
               }
