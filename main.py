@@ -35,14 +35,13 @@ def Faculty(request:Request):
     mycursor=myconnection.cursor()
     Faculty_details=[]
     try:   
-        # myconnection.execute('BEGIN')
         mycursor.execute("select * from Faculty")
         Faculty_details=mycursor.fetchall()
         print(Faculty_details)
         myconnection.commit()
     except mysql.connector.Error as e:
         print(e)
-        Faculty_details = []
+        # Faculty_details = []
     except Exception as e:
         print(e)
         # conn.rollback()
@@ -289,9 +288,9 @@ def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
     try:
         mycursor=myconnection.cursor()
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        query="insert into users (username,email,password) values (%s,%s,%s) "
+        query="insert into users (username,email,password,Type) values (%s,%s,%s,%s) "
         print(query)
-        mycursor.execute(query,(UserName,Email,hashed_password))
+        mycursor.execute(query,(UserName,Email,hashed_password,"Faculty"))
         myconnection.commit()
         return RedirectResponse(url="/signin", status_code=302)
     except IntegrityError as e:
@@ -312,35 +311,68 @@ def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
         # return True
 
 def check_username_exists(mycursor, username):
-    query = "SELECT password FROM users WHERE username = %s"
+    query = "SELECT password, type FROM users WHERE username = %s"
     mycursor.execute(query, (username,))
-    result = mycursor.fetchone()
-    mycursor.fetchall() # This ensures any remaining results are read and discarded
+    result=mycursor.fetchone()
+    mycursor.fetchall()
     return result
 
 def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
+
+
+# def get_user_type(username: str):
+#     # This function should query the database to get the type of the user
+#     # Replace this with your actual database query logic
+#     # For demonstration purposes, let's assume the user type is stored in a table called 'Users' with a column called 'type'
+#     # You should modify this function according to your database schema
+#     myconnection = get_db_connection()
+#     if not myconnection:
+#         raise HTTPException(status_code=500, detail="Failed to connect to the database")
+#     mycursor = myconnection.cursor()
+#     try:
+#         query = "SELECT Type FROM Faculty WHERE Name = %s"
+#         mycursor.execute(query, (username,))
+#         result = mycursor.fetchone()
+#         if result:
+#             return result[0]  # Return the user type
+#         else:
+#             return None  # If user not found
+#     except Exception as e:
+#         print("Error:", e)
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
+#     finally:
+#         mycursor.close()
+#         myconnection.close()
 
 @app.post("/sign-in")
 def signin(UserName:str=Form(...),password:str=Form(...)):
     myconnection=get_db_connection()
     if not myconnection:
         return{"Error":"Database connection failed"}
+    mycursor=myconnection.cursor()
+
     try:
-        mycursor=myconnection.cursor()
         result = check_username_exists(mycursor, UserName)
         if result:
-            stored_password = result[0]
+            stored_password, Type = result  # Assuming the user type is retrieved along with the password
             if verify_password(stored_password, password):
-                return {"Success": "Authentication successful"}
+            
+                if Type == "Admin":
+                    # If user is admin, return faculty table
+                    return RedirectResponse(url="/Faculty-details", status_code=302)
+                elif Type == "Faculty":
+                      # If user is faculty, return True
+                    return True
+                else:
+                    raise HTTPException(status_code=403, detail="Invalid user type")
             else:
-                return {"Error": "Incorrect password"}
+                raise HTTPException(status_code=401, detail="Incorrect password")
         else:
-            return {"Error": "Username does not exist"}
-        
+            raise HTTPException(status_code=404, detail="Username does not exist")
     except Exception as e:
-        print(e)
-        # myconnection.rollback()
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
     finally:
         mycursor.close()
         myconnection.close()
