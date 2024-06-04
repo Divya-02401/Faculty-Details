@@ -236,19 +236,6 @@ async def update_faculty(faculty_data: dict):
 #     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
-    
-
-# mycursor=mydb.cursor()
-# mycursor.execute("use university;")
-# str="insert into users(username,email) values('ran','ran@gmail.com');"
-# mycursor.execute(str)
-# mycursor.execute("select * from users;")
-# data=mycursor.fetchall()
-# print(data)
-
-
-# userconn=sqlite3.connect("User")
-
 
 @app.get("/signin")
 def read_signin(request: Request):
@@ -258,27 +245,28 @@ def read_signin(request: Request):
 def read_signup(request: Request):
     return templates.TemplateResponse("SignUp.html", {"request": request}) 
 
-# @app.get("/User-details")
-# def User(user_request:Request):   
-#     # mycursor.execute('use university;')
-#     myconnection=get_db_connection()
-#     if not myconnection:
-#         return{"Error":"Database connection failed"}
+@app.get("/User-details",response_class=HTMLResponse)
+def User(user_request:Request):   
+    myconnection=get_db_connection()
+    if not myconnection:
+        return{"Error":"Database connection failed"}
+    mycursor=myconnection.cursor()
+    users=[]
 
-#     try:
-#         mycursor=myconnection.cursor()
-#         print("Database connected")
-#         mycursor.execute("select * from users")
-#         users=mycursor.fetchall()
-#         print(users)
-#         myconnection.commit()
-#     except Exception as e:
-#         print(e)
-#         # mydb.rollback()
-#     finally:
-#         mycursor.close()
-#         myconnection.close()
-#     return templates.TemplateResponse("Signin.html", {"request": user_request})
+    try:
+        mycursor.execute("select id,username,email,Type from users")
+        users=mycursor.fetchall()
+        print(users)
+        myconnection.commit()
+    except Exception as e:
+        print(e)
+        # mydb.rollback()
+    finally:
+        mycursor.close()
+        myconnection.close()
+    return templates.TemplateResponse("User.html", {"request": user_request,"data":users})
+
+
 @app.post("/add-user")
 def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
     myconnection=get_db_connection()
@@ -344,6 +332,28 @@ def verify_password(stored_password, provided_password):
 #     finally:
 #         mycursor.close()
 #         myconnection.close()
+def get_faculty_details(mycursor, username):
+    try:
+        query = "SELECT * FROM Faculty WHERE Fid = (SELECT Fid FROM users WHERE username = %s)"
+        mycursor.execute(query, (username,))
+        faculty_details = mycursor.fetchone()
+        mycursor.fetchall()
+        if faculty_details:
+            # If faculty details are found, return them as a dictionary
+            return {
+                "Name": faculty_details[0],
+                "Department": faculty_details[1],
+                "Fid": faculty_details[2],
+                "Mobile": faculty_details[3],
+                "Email": faculty_details[4]
+            }
+        else:
+            # If no details found, return a message or handle as per your requirement
+            return {"message": "Faculty details not found"}
+    except Exception as e:
+        print("Error fetching faculty details:", e)
+        raise HTTPException(status_code=500, detail="Failed to fetch faculty details")
+
 
 @app.post("/sign-in")
 def signin(UserName:str=Form(...),password:str=Form(...)):
@@ -363,7 +373,8 @@ def signin(UserName:str=Form(...),password:str=Form(...)):
                     return RedirectResponse(url="/Faculty-details", status_code=302)
                 elif Type == "Faculty":
                       # If user is faculty, return True
-                    return True
+                    faculty_details = get_faculty_details(mycursor, UserName)
+                    return faculty_details
                 else:
                     raise HTTPException(status_code=403, detail="Invalid user type")
             else:
@@ -376,3 +387,28 @@ def signin(UserName:str=Form(...),password:str=Form(...)):
     finally:
         mycursor.close()
         myconnection.close()
+
+
+@app.get("/get-user/{user_id}")
+async def get_user(user_id: int):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, username, email, type FROM users WHERE id = %s", (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    if user:
+        return {"id": user[0], "username": user[1], "email": user[2], "type": user[3]}
+    return JSONResponse(status_code=404, content={"message": "User not found"})
+
+@app.post("/update-user")
+async def update_user(id: int = Form(...), username: str = Form(...), email: str = Form(...), type: str = Form(...)):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        UPDATE users SET username = %s, email = %s, type = %s WHERE id = %s
+    """, (username, email, type, id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return JSONResponse(status_code=200, content={"success": True})
