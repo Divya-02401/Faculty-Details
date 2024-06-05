@@ -299,7 +299,7 @@ def signup(UserName:str=Form(...),Email:str=Form(...),password:str=Form(...)):
         # return True
 
 def check_username_exists(mycursor, username):
-    query = "SELECT password, type FROM users WHERE username = %s"
+    query = "SELECT password, Type FROM users WHERE username = %s"
     mycursor.execute(query, (username,))
     result=mycursor.fetchone()
     mycursor.fetchall()
@@ -332,12 +332,19 @@ def verify_password(stored_password, provided_password):
 #     finally:
 #         mycursor.close()
 #         myconnection.close()
+
 def get_faculty_details(mycursor, username):
     try:
-        query = "SELECT * FROM Faculty WHERE Fid = (SELECT Fid FROM users WHERE username = %s)"
+        query = """
+            SELECT f.Name, f.Department, f.Fid, f.Mobile, f.Email
+            FROM Faculty f
+            INNER JOIN users u ON f.Email = u.email
+            WHERE u.username = %s
+            """        
         mycursor.execute(query, (username,))
         faculty_details = mycursor.fetchone()
         mycursor.fetchall()
+        print("Query details:", faculty_details)
         if faculty_details:
             # If faculty details are found, return them as a dictionary
             return {
@@ -349,10 +356,34 @@ def get_faculty_details(mycursor, username):
             }
         else:
             # If no details found, return a message or handle as per your requirement
-            return {"message": "Faculty details not found"}
+            # return {"message": "Faculty details not found"}
+            return None
     except Exception as e:
         print("Error fetching faculty details:", e)
         raise HTTPException(status_code=500, detail="Failed to fetch faculty details")
+
+
+@app.get("/faculty-details/{username}", response_class=HTMLResponse)
+def display_faculty_details(request: Request, username: str):
+    myconnection = get_db_connection()
+    if not myconnection:
+        raise HTTPException(status_code=500, detail="Database connection failed")
+    mycursor = myconnection.cursor()
+
+    try:
+        faculty_details = get_faculty_details(mycursor, username)
+        if faculty_details:
+            return templates.TemplateResponse("FacultyDetails.html", {"request": request, "data": faculty_details})
+        else:
+            return templates.TemplateResponse("FacultyDetails.html", {"request": request, "error": "Details not found"})
+    except HTTPException as e:
+        raise e  # Propagate HTTP exceptions
+    except Exception as e:
+        print("Error fetching faculty details:", e)
+        raise HTTPException(status_code=500, detail="Failed to fetch faculty details")
+    finally:
+        mycursor.close()
+        myconnection.close()
 
 
 @app.post("/sign-in")
@@ -373,14 +404,16 @@ def signin(UserName:str=Form(...),password:str=Form(...)):
                     return RedirectResponse(url="/Faculty-details", status_code=302)
                 elif Type == "Faculty":
                       # If user is faculty, return True
-                    faculty_details = get_faculty_details(mycursor, UserName)
-                    return faculty_details
+                    # faculty_details = get_faculty_details(mycursor, UserName)
+                    return RedirectResponse(url=f"/faculty-details/{UserName}", status_code=302)
                 else:
                     raise HTTPException(status_code=403, detail="Invalid user type")
             else:
-                raise HTTPException(status_code=401, detail="Incorrect password")
+                # return templates.TemplateResponse("Signin.html", {"request": request, "error": "Incorrect password"})
+                return {"Incorect password"}
         else:
-            raise HTTPException(status_code=404, detail="Username does not exist")
+            # return templates.TemplateResponse("Signin.html", {"request": request, "error": "Username doesn't exist"})
+            return {"User Name does not exists!"}
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
