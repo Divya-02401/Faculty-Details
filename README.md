@@ -8,7 +8,6 @@ The Faculty and Admin Management Application is a web-based platform designed to
 
 ### For Faculty Members:
 - **Secure Login**: Faculty members can securely log in to view and manage their details.
-- **Task Management**: Ability to view assigned tasks, update progress, and mark tasks as complete.
 - **Profile Editing**: Update personal information such as contact details and specialization.
 - **Responsive Interface**: Designed for ease of use across different devices with a responsive and user-friendly design.
 
